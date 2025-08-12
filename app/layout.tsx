@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mari's Birthday",
-  description: "Happy Birthday, Mari!",
+  title: "BMI Analytics",
+  description: "Analyze your BMI and health metrics",
 };
 
 export default function RootLayout({
