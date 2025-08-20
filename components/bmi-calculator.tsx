@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getHealthRecommendations } from "@/lib/gemini"
 import Markdown from "react-markdown"
+import Image from "next/image"
 import {
     Flame,
     Weight,
@@ -344,7 +345,7 @@ export default function BMICalculator() {
                     </React.Fragment>
                 ))}
             </div>
-            <div className="text-center">
+            <div className="text-center py-4">
                 <Badge variant="outline" className="text-sm">
                     Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
                 </Badge>
@@ -368,16 +369,23 @@ export default function BMICalculator() {
                                     animate={{ y: [0, -5, 0] }}
                                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                                 >
-                                    <Heart className="text-white text-2xl" />
+                                    {/* <Heart className="text-white text-2xl" /> */}
+                                    <Image
+                                        src="/image.png"
+                                        alt="BMI Logo"
+                                        width={80}
+                                        height={80}
+                                        className="rounded-full"
+                                    />
                                 </motion.div>
                                 <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
                                     Welcome to Your Health Journey
                                 </h1>
-                                <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto">
                                     Calculate your BMI and daily calorie needs with support for both metric and imperial units. Get
                                     personalized health insights to help you make informed decisions about your wellness goals.
                                 </p>
-                                <div className="bg-blue-50 dark:bg-gray-700 rounded-xl p-6 mb-8">
+                                <div className=" dark:bg-gray-700 rounded-xl p-6 mb-8">
                                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4">What you'll discover:</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-300">
                                         <div className="flex items-center justify-center">
@@ -731,7 +739,7 @@ export default function BMICalculator() {
                         variants={pageVariants}
                     // transition={pageTransition}
                     >
-                        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+                        <Card className="shadow-2xl pt-3 border-0 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
                             <CardHeader>
                                 <CardTitle className="text-3xl text-center text-gray-800 dark:text-white">Your BMI Results</CardTitle>
                                 <p className="text-center text-gray-600 dark:text-gray-300">
