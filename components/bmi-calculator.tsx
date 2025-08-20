@@ -30,6 +30,7 @@ import {
     Calculator,
     Target,
     Loader2,
+    Stethoscope,
 } from "lucide-react"
 import GaugeChart from "@/components/gauge-chart"
 
@@ -821,7 +822,7 @@ export default function BMICalculator() {
                         variants={pageVariants}
                     // transition={pageTransition}
                     >
-                        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80">
+                        <Card className="shadow-2xl border-0 bg-white/80 pt-8 backdrop-blur-sm dark:bg-gray-800/80">
                             <CardHeader>
                                 <CardTitle className="text-3xl text-center text-gray-800 dark:text-white">
                                     Complete Health Analysis
@@ -833,7 +834,7 @@ export default function BMICalculator() {
                             <CardContent className="p-8">
                                 {/* Results Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
+                                    <div className="bg-gradient-to-r from-blue-500 to-blue-900 text-white p-6 rounded-xl">
                                         <div className="flex items-center mb-4">
                                             <Weight className="text-2xl mr-3" />
                                             <h3 className="text-lg font-semibold">Body Mass Index</h3>
@@ -842,7 +843,7 @@ export default function BMICalculator() {
                                         <div className="opacity-90">{results.bmiCategory}</div>
                                     </div>
 
-                                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
+                                    <div className="bg-gradient-to-r from-blue-900 to-blue-600 text-white p-6 rounded-xl">
                                         {/* Title */}
                                         <div className="flex items-center mb-4">
                                             <Flame className="text-2xl mr-3" />
@@ -880,7 +881,7 @@ export default function BMICalculator() {
 
 
                                 {/* Health Advice */}
-                                <div className="bg-amber-50 dark:bg-gray-700 rounded-xl p-6 mb-8 border border-amber-200 dark:border-gray-600">
+                                <div className=" dark:bg-gray-700 rounded-xl p-6 mb-8 border border-amber-200 dark:border-gray-600">
                                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                                         <Lightbulb className="text-amber-500 mr-2" />
                                         Personalized Health Advice
@@ -891,10 +892,10 @@ export default function BMICalculator() {
                                 </div>
 
                                 {/* AI Recommendations */}
-                                <div className="bg-blue-50 dark:bg-gray-800 rounded-xl p-6 mb-8 border border-blue-200 dark:border-gray-600">
+                                <div className=" dark:bg-gray-800 rounded-xl p-6 mb-8 border border-blue-200 dark:border-gray-600">
                                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                                        <Lightbulb className="text-blue-500 mr-2" />
-                                        AI-Powered Health & Nutrition Recommendations
+                                        <Stethoscope className="text-blue-500 mr-2" />
+                                        Health & Nutrition Recommendations
                                     </h3>
                                     {isLoadingAi ? (
                                         <div className="flex items-center justify-center py-8">
@@ -944,7 +945,7 @@ export default function BMICalculator() {
                                     <Button
                                         onClick={resetCalculator}
                                         size="lg"
-                                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-8"
+                                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-8"
                                     >
                                         <RotateCcw className="h-4 w-4" />New Calculation
                                     </Button>
