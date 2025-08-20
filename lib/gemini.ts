@@ -34,7 +34,13 @@ export async function getHealthRecommendations(healthInfo: HealthInfo) {
     2. Personalized health advice considering their conditions and restrictions
     3. 3-5 specific Nigerian food recommendations with brief explanations why they're suitable
     4. General lifestyle recommendations
-    
+
+    - Encourage regular physical activity, such as walking, jogging, or yoga, to improve overall health and maintain a healthy weight.
+    - Promote hydration by drinking plenty of water throughout the day.
+    - Suggest mindfulness practices, such as meditation or deep breathing exercises, to manage stress and improve mental well-being.
+
+    Start your response with "Based on your information, here are your personalized health recommendations:"
+
     Format the response in markdown with clear sections.
     `;
 
