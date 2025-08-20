@@ -2,9 +2,9 @@
 
 import React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useForm } from "react-hook-form"
+import { SubmitHandler, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
@@ -14,11 +14,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { ThemeToggle } from "@/components/theme-toggle"
+import { getHealthRecommendations } from "@/lib/gemini"
+import Markdown from "react-markdown"
 import {
-    Heart,
-    Calculator,
-    Target,
     Flame,
     Weight,
     ArrowRight,
@@ -27,8 +25,43 @@ import {
     Lightbulb,
     Ruler,
     Scale,
+    Heart,
+    Calculator,
+    Target,
+    Loader2,
 } from "lucide-react"
 import GaugeChart from "@/components/gauge-chart"
+
+const healthConditions = [
+    "Diabetes",
+    "High Blood Pressure",
+    "High Cholesterol",
+    "Heart Disease",
+    "Thyroid Disorder",
+    "PCOS",
+    "None"
+];
+
+const dietaryRestrictions = [
+    "Vegetarian",
+    "Vegan",
+    "Pescatarian",
+    "Gluten-Free",
+    "Dairy-Free",
+    "Halal",
+    "None"
+];
+
+const commonAllergies = [
+    "Peanuts",
+    "Shellfish",
+    "Eggs",
+    "Dairy",
+    "Soy",
+    "Wheat",
+    "Fish",
+    "None"
+];
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -39,7 +72,39 @@ const formSchema = z.object({
     activity: z.number().min(1.2).max(1.725),
     heightUnit: z.enum(["cm", "ft"]),
     weightUnit: z.enum(["kg", "lb"]),
+    healthConditions: z.array(z.string()),
+    dietaryRestrictions: z.array(z.string()),
+    allergies: z.array(z.string()),
+    otherHealthConditions: z.string().optional(),
+    otherAllergies: z.string().optional(),
 })
+
+
+// const formSchema = z.object({
+//   name: z.string().min(1, "Name is required"),
+//   age: z.number().min(1, "Age must be at least 1").max(120, "Age must be less than 120"),
+//   gender: z.string().min(1, "Please select a gender"),
+//   height: z.number().min(50, "Height must be at least 50cm").max(300, "Height must be less than 300cm"),
+//   weight: z.number().min(20, "Weight must be at least 20kg").max(500, "Weight must be less than 500kg"),
+//   activity: z.number().min(1.2).max(1.725),
+//   heightUnit: z.enum(["cm", "ft"]),
+//   weightUnit: z.enum(["kg", "lb"]),
+//   healthConditions: z.array(z.string()),
+//   dietaryRestrictions: z.array(z.string()),
+//   allergies: z.array(z.string()),
+//   otherHealthConditions: z.string().optional(),
+//   otherAllergies: z.string().optional(),
+// })
+
+
+
+
+
+
+
+
+
+
 
 type FormData = z.infer<typeof formSchema>
 
@@ -68,6 +133,8 @@ const activityLevels = [
 export default function BMICalculator() {
     const [currentStep, setCurrentStep] = useState(0)
     const [results, setResults] = useState<CalculationResults | null>(null)
+    const [aiRecommendations, setAiRecommendations] = useState<string>("")
+    const [isLoadingAi, setIsLoadingAi] = useState(false)
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -80,6 +147,11 @@ export default function BMICalculator() {
             activity: 1.55,
             heightUnit: "cm",
             weightUnit: "kg",
+            healthConditions: [] as string[],
+            dietaryRestrictions: [] as string[],
+            allergies: [] as string[],
+            otherHealthConditions: "",
+            otherAllergies: "",
         },
     })
 
@@ -181,10 +253,37 @@ export default function BMICalculator() {
         }
     }
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         const calculationResults = calculateResults(data)
         setResults(calculationResults)
         setCurrentStep(2)
+
+        // const onSubmit: SubmitHandler<FormData> = async (data) => {
+        //     const calculationResults = calculateResults(data)
+        //     setResults(calculationResults)
+        //     setCurrentStep(2)
+        // }
+        // Fetch AI recommendations
+        setIsLoadingAi(true)
+        try {
+            const activityLevel = activityLevels.find(lvl => lvl.value === data.activity)?.label || 'Moderate'
+            const recommendations = await getHealthRecommendations({
+                bmi: calculationResults.bmi,
+                bmiCategory: calculationResults.bmiCategory,
+                healthConditions: data.healthConditions || [],
+                dietaryRestrictions: data.dietaryRestrictions || [],
+                allergies: data.allergies || [],
+                age: data.age,
+                gender: data.gender,
+                activityLevel: activityLevel
+            })
+            setAiRecommendations(recommendations)
+        } catch (error) {
+            console.error('Error fetching AI recommendations:', error)
+            setAiRecommendations('Unable to load personalized recommendations. Please try again later.')
+        } finally {
+            setIsLoadingAi(false)
+        }
     }
 
     const nextStep = () => {
@@ -202,6 +301,8 @@ export default function BMICalculator() {
     const resetCalculator = () => {
         setCurrentStep(0)
         setResults(null)
+        setAiRecommendations("")
+        setIsLoadingAi(false)
         form.reset()
     }
 
@@ -494,6 +595,108 @@ export default function BMICalculator() {
                                         </div>
                                     </div>
 
+                                    {/* Health Conditions */}
+                                    <div className="space-y-4">
+                                        <Label className="text-sm font-medium">Health Conditions (Select all that apply)</Label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {['Diabetes', 'High Blood Pressure', 'Heart Disease', 'Thyroid', 'PCOS', 'Other'].map((condition) => (
+                                                <div key={condition} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`condition-${condition}`}
+                                                        checked={form.watch('healthConditions')?.includes(condition)}
+                                                        onChange={(e) => {
+                                                            const currentConditions = form.getValues('healthConditions') || [];
+                                                            if (e.target.checked) {
+                                                                form.setValue('healthConditions', [...currentConditions, condition]);
+                                                            } else {
+                                                                form.setValue('healthConditions', currentConditions.filter(c => c !== condition));
+                                                            }
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <Label htmlFor={`condition-${condition}`} className="text-sm font-normal">
+                                                        {condition}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {form.watch('healthConditions')?.includes('Other') && (
+                                            <div className="mt-2">
+                                                <Input
+                                                    placeholder="Please specify other health conditions"
+                                                    {...form.register('otherHealthConditions')}
+                                                    className="h-10"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Dietary Restrictions */}
+                                    <div className="space-y-4">
+                                        <Label className="text-sm font-medium">Dietary Restrictions (Select all that apply)</Label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Paleo', 'Other'].map((diet) => (
+                                                <div key={diet} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`diet-${diet}`}
+                                                        checked={form.watch('dietaryRestrictions')?.includes(diet)}
+                                                        onChange={(e) => {
+                                                            const currentDiets = form.getValues('dietaryRestrictions') || [];
+                                                            if (e.target.checked) {
+                                                                form.setValue('dietaryRestrictions', [...currentDiets, diet]);
+                                                            } else {
+                                                                form.setValue('dietaryRestrictions', currentDiets.filter(d => d !== diet));
+                                                            }
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <Label htmlFor={`diet-${diet}`} className="text-sm font-normal">
+                                                        {diet}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Allergies */}
+                                    <div className="space-y-4">
+                                        <Label className="text-sm font-medium">Allergies (Select all that apply)</Label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {['Peanuts', 'Tree Nuts', 'Shellfish', 'Eggs', 'Dairy', 'Soy', 'Wheat', 'Other'].map((allergy) => (
+                                                <div key={allergy} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`allergy-${allergy}`}
+                                                        checked={form.watch('allergies')?.includes(allergy)}
+                                                        onChange={(e) => {
+                                                            const currentAllergies = form.getValues('allergies') || [];
+                                                            if (e.target.checked) {
+                                                                form.setValue('allergies', [...currentAllergies, allergy]);
+                                                            } else {
+                                                                form.setValue('allergies', currentAllergies.filter(a => a !== allergy));
+                                                            }
+                                                        }}
+                                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <Label htmlFor={`allergy-${allergy}`} className="text-sm font-normal">
+                                                        {allergy}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {form.watch('allergies')?.includes('Other') && (
+                                            <div className="mt-2">
+                                                <Input
+                                                    placeholder="Please specify other allergies"
+                                                    {...form.register('otherAllergies')}
+                                                    className="h-10"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <div className="flex justify-between pt-6">
                                         <Button
                                             type="button"
@@ -632,37 +835,37 @@ export default function BMICalculator() {
                                     </div>
 
                                     <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-  {/* Title */}
-  <div className="flex items-center mb-4">
-    <Flame className="text-2xl mr-3" />
-    <h3 className="text-lg font-semibold">Daily Calories</h3>
-  </div>
+                                        {/* Title */}
+                                        <div className="flex items-center mb-4">
+                                            <Flame className="text-2xl mr-3" />
+                                            <h3 className="text-lg font-semibold">Daily Calories</h3>
+                                        </div>
 
-  {/* Calories */}
-  <div className="text-4xl font-bold mb-1">{results.dailyCalories.toLocaleString()}</div>
-  <div className="text-sm opacity-90 mb-4">Calories per day</div>
+                                        {/* Calories */}
+                                        <div className="text-4xl font-bold mb-1">{results.dailyCalories.toLocaleString()}</div>
+                                        <div className="text-sm opacity-90 mb-4">Calories per day</div>
 
-  {/* Macros */}
-  <div className="flex justify-between">
-    {/* Protein */}
-    <div className="flex flex-col items-center">
-      <span className="text-base font-bold">{results.proteinGrams.toLocaleString()}g</span>
-      <span className="text-xs font-medium">Protein</span>
-    </div>
+                                        {/* Macros */}
+                                        <div className="flex justify-between">
+                                            {/* Protein */}
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-base font-bold">{results.proteinGrams.toLocaleString()}g</span>
+                                                <span className="text-xs font-medium">Protein</span>
+                                            </div>
 
-    {/* Carbs */}
-    <div className="flex flex-col items-center">
-      <span className="text-base font-bold">{results.carbsGrams.toLocaleString()}g</span>
-      <span className="text-xs font-medium">Carbs</span>
-    </div>
+                                            {/* Carbs */}
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-base font-bold">{results.carbsGrams.toLocaleString()}g</span>
+                                                <span className="text-xs font-medium">Carbs</span>
+                                            </div>
 
-    {/* Fat */}
-    <div className="flex flex-col items-center">
-      <span className="text-base font-bold">{results.fatGrams.toLocaleString()}g</span>
-      <span className="text-xs font-medium">Fat</span>
-    </div>
-  </div>
-</div>
+                                            {/* Fat */}
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-base font-bold">{results.fatGrams.toLocaleString()}g</span>
+                                                <span className="text-xs font-medium">Fat</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                 </div>
 
@@ -674,7 +877,34 @@ export default function BMICalculator() {
                                         <Lightbulb className="text-amber-500 mr-2" />
                                         Personalized Health Advice
                                     </h3>
-                                    <div className="text-gray-700 dark:text-gray-300 leading-relaxed">{results.healthAdvice}</div>
+                                    <div className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                        {results.healthAdvice}
+                                    </div>
+                                </div>
+
+                                {/* AI Recommendations */}
+                                <div className="bg-blue-50 dark:bg-gray-800 rounded-xl p-6 mb-8 border border-blue-200 dark:border-gray-600">
+                                    <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <Lightbulb className="text-blue-500 mr-2" />
+                                        AI-Powered Health & Nutrition Recommendations
+                                    </h3>
+                                    {isLoadingAi ? (
+                                        <div className="flex items-center justify-center py-8">
+                                            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                                            <span className="ml-2 text-gray-600 dark:text-gray-300">Generating personalized recommendations...</span>
+                                        </div>
+                                    ) : aiRecommendations ? (
+                                        <div
+                                            className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+                                        // dangerouslySetInnerHTML={{ 
+                                        //     __html: aiRecommendations.replace(/\n/g, '<br />')
+                                        // }} 
+                                        ><Markdown>{aiRecommendations}</Markdown></div>
+                                    ) : (
+                                        <div className="text-gray-600 dark:text-gray-400 italic">
+                                            No recommendations available. Please complete the form to generate personalized advice.
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Summary Stats */}
