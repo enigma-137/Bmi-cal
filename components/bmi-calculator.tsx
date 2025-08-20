@@ -946,7 +946,7 @@ export default function BMICalculator() {
                                         size="lg"
                                         className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 px-8"
                                     >
-                                        <RotateCcw className="mr-2 h-4 w-4" /> New Calculation
+                                        <RotateCcw className="h-4 w-4" />New Calculation
                                     </Button>
                                 </div>
                             </CardContent>
