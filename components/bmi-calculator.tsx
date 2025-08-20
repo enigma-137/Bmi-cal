@@ -31,6 +31,7 @@ import {
     Target,
     Loader2,
     Stethoscope,
+    User,
 } from "lucide-react"
 import GaugeChart from "@/components/gauge-chart"
 
@@ -379,7 +380,7 @@ export default function BMICalculator() {
                                         className="rounded-full"
                                     />
                                 </motion.div>
-                                <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                                <h1 className="text-xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
                                     Welcome to Your Health Journey
                                 </h1>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto">
@@ -390,16 +391,20 @@ export default function BMICalculator() {
                                     <h3 className="font-semibold text-gray-800 dark:text-white mb-4">What you'll discover:</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-300">
                                         <div className="flex items-center justify-center">
-                                            <Calculator className="text-blue-500 mr-2 h-5 w-5" />
+                                            <Calculator className="text-blue-500 h-5 w-5" />
                                             Your BMI score & category
                                         </div>
                                         <div className="flex items-center justify-center">
-                                            <Target className="text-blue-500 mr-2 h-5 w-5" />
+                                            <Target className="text-blue-500 h-5 w-5" />
                                             Healthy weight range
                                         </div>
                                         <div className="flex items-center justify-center">
-                                            <Flame className="text-blue-500 mr-2 h-5 w-5" />
+                                            <Flame className="text-blue-500 h-5 w-5" />
                                             Daily calorie needs
+                                        </div>
+                                        <div className="flex items-center justify-center">
+                                            <User className="text-blue-500 h-5 w-5" />
+                                            Personalized healthy advice and recommendations
                                         </div>
                                     </div>
                                 </div>
