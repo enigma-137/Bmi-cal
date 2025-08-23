@@ -39,7 +39,7 @@ export async function getHealthRecommendations(healthInfo: HealthInfo) {
     - Promote hydration by drinking plenty of water throughout the day.
     - Suggest mindfulness practices, such as meditation or deep breathing exercises, to manage stress and improve mental well-being.
 
-    Start your response with "Based on your information, here are your personalized health recommendations:"
+    Start your response with "Based on your information, here are your personalized health recommendations: Make sure it's not too long"
 
     Format the response in markdown with clear sections.
     `;

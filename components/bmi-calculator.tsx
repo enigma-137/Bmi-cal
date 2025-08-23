@@ -403,7 +403,7 @@ export default function BMICalculator() {
                                             Daily calorie needs
                                         </div>
                                         <div className="flex items-center justify-center">
-                                            <User className="text-blue-500 h-5 w-5" />
+                                            <User className="text-blue-500 h-5 w-5 inline" />
                                             Personalized healthy advice and recommendations
                                         </div>
                                     </div>
